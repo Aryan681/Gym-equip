@@ -21,6 +21,7 @@ const Footer = () => {
 
   return (
     <footer 
+    id='footer'
       ref={footerRef}
       className="bg-white border-t border-gray-100 mt-20"
     >
@@ -29,20 +30,8 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg">
-                <svg 
-                  className="w-7 h-7 text-white" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M13 10V3L4 14h7v7l9-11h-7z" 
-                  />
-                </svg>
+              <div className="w-18 h-18 flex items-center justify-center shadow-lg">
+                <img src="/icon.jpg" alt="GymAI Logo" className="w-13 h-13 object-contain" />
               </div>
               <span className="ml-4 text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">GymAI</span>
             </div>

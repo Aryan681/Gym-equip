@@ -114,7 +114,7 @@ const Home = () => {
     subtitleRef.current.appendChild(span);
   });
 
-    // Background gradient animation (using backgroundRef)
+  
     
   }, []);
 
@@ -238,28 +238,15 @@ const Home = () => {
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
-        <div className="flex flex-col md:flex-row items-center md:justify-between gap-12 mb-20 md:mb-32">
+        <div className="flex flex-col md:flex-row items-center md:justify-between gap-12 mt-4 mb-20 md:mb-32">
           {/* Left Column - Text Content */}
           <div className="md:w-1/2 text-center md:text-left">
             <div 
               ref={heroIconRef}
               className="inline-block md:inline-flex mb-10 p-6 bg-white rounded-3xl shadow-xl transform transition-all duration-1000 ease-in-out hover:scale-105"
             >
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto md:mx-0">
-                <svg 
-                  className="w-12 h-12 text-white" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M13 10V3L4 14h7v7l9-11h-7z" 
-                  />
-                </svg>
+              <div className="w-24 h-24 flex items-center justify-center mx-auto md:mx-0">
+                <img src="/icon.jpg" alt="Gym Equipment AI Assistant Icon" className="w-20 h-20 object-contain" />
               </div>
             </div>
             
@@ -312,7 +299,7 @@ const Home = () => {
         )}
 
         {/* Features Section */}
-        <div className="m-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div id="features-section" className="features-section m-20 grid grid-cols-1 md:grid-cols-3 gap-8 scroll-mt-20">
           <FeatureCard
             iconBgColor="#e0f2fe" // Light Blue
             icon={(
