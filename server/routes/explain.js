@@ -55,7 +55,7 @@ Only return valid JSON. Do not include explanations or markdown. No triple backt
     const response = await result.response;
     const text = response.text();
 
-    const parsed = extractJSON(text); // ✅ Now extractJSON is defined above
+    const parsed = extractJSON(text); 
     res.json(parsed);
 
   } catch (err) {
