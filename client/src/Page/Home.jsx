@@ -8,6 +8,7 @@ import ExerciseCard from "../component/cards/Excersice";
 import Loader from "../component/common/loading/Loader";
 import FeatureCard from "../component/common/FeatureCard";
 import axios from "axios";
+import dotenv from "dotenv";
 
 // Register GSAP plugins
 gsap.registerPlugin(MotionPathPlugin, TextPlugin, ScrollTrigger);
@@ -36,7 +37,7 @@ const Home = () => {
   // Create floating orbs data
   const floatingOrbsData = useRef([]);
   
-  const BASE_URL = "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
   useEffect(() => {
     const orbRefs = [orb0Ref, orb1Ref, orb2Ref, orb3Ref, orb4Ref, orb5Ref, orb6Ref, orb7Ref];
@@ -238,24 +239,24 @@ const Home = () => {
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
-        <div className="flex flex-col md:flex-row items-center md:justify-between gap-12 mt-4 mb-20 md:mb-32">
+        <div  className="flex flex-col md:flex-row items-center md:justify-between gap-12 mt-4 mb-20 md:mb-32">
           {/* Left Column - Text Content */}
           <div className="md:w-1/2 text-center md:text-left">
-            <div 
-              ref={heroIconRef}
-              className="inline-block md:inline-flex mb-10 p-6 bg-white rounded-3xl shadow-xl transform transition-all duration-1000 ease-in-out hover:scale-105"
-            >
-              <div className="w-24 h-24 flex items-center justify-center mx-auto md:mx-0">
-                <img src="/icon.jpg" alt="Gym Equipment AI Assistant Icon" className="w-20 h-20 object-contain" />
+              <div 
+                ref={heroIconRef}
+                className="inline-block md:inline-flex mb-10 p-6 bg-white rounded-3xl shadow-xl transform transition-all duration-1000 ease-in-out hover:scale-105"
+              >
+                <div className="w-24 h-24 flex items-center justify-center mx-auto md:mx-0">
+                  <img src="/icon.jpg" alt="Gym Equipment AI Assistant Icon" className="w-20 h-20 object-contain" />
+                </div>
               </div>
-            </div>
-            
-            <h1
-              ref={titleRef}
-              className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight leading-tight"
-            >
-              Your Ultimate <br className="hidden sm:inline"/> <span className="text-gradient">AI Gym Partner</span>
-            </h1>
+              
+              <h1
+                ref={titleRef}
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight leading-tight"
+              >
+                Your Ultimate <br className="hidden sm:inline"/> <span className="text-gradient">AI Gym Partner</span>
+              </h1>
             
             <p
               ref={subtitleRef}

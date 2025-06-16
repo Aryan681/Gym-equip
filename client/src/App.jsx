@@ -5,6 +5,15 @@ import Navbar from "./component/common/bais/Navbar";
 import Footer from "./component/common/bais/Footer";
 
 function App() {
+  const scrollToHome = () => {
+    const homeSection = document.getElementById('home-section');
+    if (homeSection) {
+      homeSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  };
   const scrollToFeatures = () => {
     const featuresSection = document.getElementById('features-section');
     if (featuresSection) {
@@ -27,11 +36,11 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar scrollToFeatures={scrollToFeatures} scrollToFooter={scrollToFooter} />
+      <Navbar scrollToFeatures={scrollToFeatures} scrollToFooter={scrollToFooter} scrollToHome={scrollToHome} />
       <main className="flex-grow pt-16">
         <Home />
       </main>
-      <Footer />
+      <Footer scrollToFeatures={scrollToFeatures} scrollToFooter={scrollToFooter} scrollToHome={scrollToHome} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 
-const Navbar = ({ scrollToFeatures, scrollToFooter }) => {
+const Navbar = ({ scrollToFeatures, scrollToFooter,scrollToHome }) => {
   const navRef = useRef(null);
   const logoRef = useRef(null);
   const menuRef = useRef(null);
@@ -51,7 +51,11 @@ const Navbar = ({ scrollToFeatures, scrollToFooter }) => {
           {/* Navigation Menu */}
           <div ref={menuRef} className="hidden md:flex items-center space-x-8">
             <a
-              href="#"
+              onClick={(e) => {
+                e.preventDefault(); // This prevents the default anchor behavior
+                scrollToHome();
+              }}
+              href="#home-section"
               className="text-gray-600 hover:text-blue-600 transition-colors"
             >
               Home

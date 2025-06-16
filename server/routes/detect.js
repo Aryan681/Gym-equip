@@ -2,16 +2,17 @@ const express = require('express');
 const multer = require('multer');
 const vision = require('@google-cloud/vision');
 const path = require('path');
+const auth = require('../middleware/auth');
 require('dotenv').config();
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
 const client = new vision.ImageAnnotatorClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
 
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
    console.log("✅ Route hit: /api/detect");
   try {
     const imagePath = path.resolve(req.file.path);

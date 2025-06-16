@@ -4,9 +4,13 @@ const multer = require("multer");
 const vision = require("@google-cloud/vision");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require("axios");
+const auth = require('../middleware/auth');
 require("dotenv").config();
 
-const client = new vision.ImageAnnotatorClient();
+
+const client = new vision.ImageAnnotatorClient({
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+});
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -44,7 +48,7 @@ async function fetchExerciseDbGif(exerciseName) {
 }
 
 // 🔗 POST route to handle image + Gemini + GIF flow
-router.post("/", upload.single("image"), async (req, res) => {
+router.post("/", auth, upload.single("image"), async (req, res) => {
   try {
     const imageBuffer = req.file.buffer;
 

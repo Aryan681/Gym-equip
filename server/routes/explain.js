@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const auth = require('../middleware/auth');
 require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -16,7 +17,7 @@ function extractJSON(text) {
   return JSON.parse(jsonString);
 }
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { equipment } = req.body;
 
   if (!equipment) {
