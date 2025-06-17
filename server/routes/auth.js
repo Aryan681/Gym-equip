@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const auth = require('../middleware/auth');
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -47,6 +48,7 @@ router.post('/register', async (req, res) => {
       token
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ error: 'Error creating user' });
   }
 });
@@ -87,7 +89,30 @@ router.post('/login', async (req, res) => {
       token
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Error logging in' });
+  }
+});
+
+// Get current user
+router.get('/me', auth, async (req, res) => {
+  try {
+    res.json(req.user);
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'Error fetching user data' });
+  }
+});
+
+// Logout user (optional - client-side only)
+router.post('/logout', auth, async (req, res) => {
+  try {
+    // Since we're using JWT, we don't need to do anything server-side
+    // The client will remove the token
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Error logging out' });
   }
 });
 

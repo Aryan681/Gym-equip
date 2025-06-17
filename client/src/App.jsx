@@ -1,48 +1,65 @@
-import React from 'react'
-import './App.css'
-import Home from "./page/Home";
-import Navbar from "./component/common/bais/Navbar";
-import Footer from "./component/common/bais/Footer";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './component/common/bais/Navbar';
+import Footer from './component/common/bais/Footer';
+import { useRef } from 'react';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import Home from './page/Home';
 
-function App() {
+// Protected Route component
+
+
+const AppRoutes = () => {
+  const homeRef = useRef(null);
+  const featuresRef = useRef(null);
+  const footerRef = useRef(null);
+
   const scrollToHome = () => {
-    const homeSection = document.getElementById('home-section');
-    if (homeSection) {
-      homeSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
+    homeRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
   const scrollToFeatures = () => {
-    const featuresSection = document.getElementById('features-section');
-    if (featuresSection) {
-      featuresSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
+    featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const scrollToFooter = () => {
-    const footerSection = document.getElementById('footer');
-    if (footerSection) {
-      footerSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
+    footerRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar scrollToFeatures={scrollToFeatures} scrollToFooter={scrollToFooter} scrollToHome={scrollToHome} />
-      <main className="flex-grow pt-16">
-        <Home />
-      </main>
-      <Footer scrollToFeatures={scrollToFeatures} scrollToFooter={scrollToFooter} scrollToHome={scrollToHome} />
-    </div>
+ return (
+    <Router>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <Navbar
+            scrollToHome={scrollToHome}
+            scrollToFeatures={scrollToFeatures}
+            scrollToFooter={scrollToFooter}
+          />
+          <div className="flex-grow">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/"
+                element={
+                  <Home
+                    homeRef={homeRef}
+                    featuresRef={featuresRef}
+                    
+                  />
+                }
+              />
+            </Routes>
+          </div>
+          <Footer scrollToHome={scrollToHome}
+            scrollToFeatures={scrollToFeatures}
+            scrollToFooter={scrollToFooter}
+            footerRef={footerRef} /> 
+        </div>
+      </AuthProvider>
+    </Router>
   );
-}
+};
 
-export default App
+export default AppRoutes;

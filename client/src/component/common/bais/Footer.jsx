@@ -1,8 +1,8 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 
-const Footer = ({ scrollToFeatures, scrollToFooter, scrollToHome }) => {
-  const footerRef = useRef(null);
+const Footer = ({ scrollToFeatures, scrollToFooter, scrollToHome ,footerRef}) => {
+
   const contentRef = useRef(null);
 
   useEffect(() => {

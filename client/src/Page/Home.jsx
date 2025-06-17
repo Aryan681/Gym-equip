@@ -7,16 +7,20 @@ import UploadForm from "../component/Upload";
 import ExerciseCard from "../component/cards/Excersice";
 import Loader from "../component/common/loading/Loader";
 import FeatureCard from "../component/common/FeatureCard";
+import AuthPromptModal from "../component/common/AuthPromptModal";
+import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import dotenv from "dotenv";
+
 
 // Register GSAP plugins
 gsap.registerPlugin(MotionPathPlugin, TextPlugin, ScrollTrigger);
 
-const Home = () => {
+const Home = ({homeRef,featuresRef,footerRef}) => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { user } = useAuth();
 
   // Refs for GSAP animations
   const titleRef = useRef(null);
@@ -77,15 +81,19 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
     });
 
     // Title typing animation
+     const firstLine = "Gym Equipment";
+  const secondLine = `<br /><span class='bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent'>AI Assistant</span>`;
+
     gsap.to(titleRef.current, {
-      text: {
-        value: "Gym Equipment AI Assistant",
-        speed: 0.5,
-        delimiter: ""
-      },
-      duration: 1.5,
-      ease: "power2.in"
-    });
+    text: {
+      value: `${firstLine}${secondLine}`,
+      speed: 0.5,
+      delimiter: "",
+    },
+    duration: 1.5,
+    ease: "power2.in",
+  });
+  
 
     // Subtitle animation with floating letters
     const subtitleChars = subtitleRef.current.textContent.split(/(\s+)/);
@@ -151,6 +159,11 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
   }, [data]);
 
   const handleUpload = async (file) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setIsLoading(true);
     setUploadProgress(0);
     
@@ -220,6 +233,12 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
     <div
       className="min-h-screen bg-white relative overflow-hidden"
     >
+      {/* Auth Prompt Modal */}
+      <AuthPromptModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
+
       {/* Floating orbs */}
       {floatingOrbsData.current.map((orb) => (
         <div
@@ -239,7 +258,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
-        <div  className="flex flex-col md:flex-row items-center md:justify-between gap-12 mt-4 mb-20 md:mb-32">
+        <div id="hero-section" ref={homeRef} className="flex flex-col md:flex-row items-center md:justify-between gap-12 mt-4 mb-20 md:mb-32">
           {/* Left Column - Text Content */}
           <div className="md:w-1/2 text-center md:text-left">
               <div 
@@ -255,7 +274,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
                 ref={titleRef}
                 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight leading-tight"
               >
-                Your Ultimate <br className="hidden sm:inline"/> <span className="text-gradient">AI Gym Partner</span>
+                Your Ultimate <br className="hidden sm:inline"/> <span className="bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">AI Gym Partner</span>
               </h1>
             
             <p
@@ -274,7 +293,11 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
           {/* Right Column - Upload Form */}
           <div className="md:w-1/2 max-w-2xl mx-auto md:mx-0">
             <div className="bg-white rounded-2xl shadow-xl p-8 transform transition-all duration-300 hover:shadow-2xl">
-              <UploadForm onUpload={handleUpload} isLoading={isLoading} progress={uploadProgress} onResult={setData} />
+              <UploadForm 
+                onUpload={handleUpload} 
+                isLoading={isLoading}
+                uploadProgress={uploadProgress}
+              />
             </div>
           </div>
         </div>
@@ -300,7 +323,9 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
         )}
 
         {/* Features Section */}
-        <div id="features-section" className="features-section m-20 grid grid-cols-1 md:grid-cols-3 gap-8 scroll-mt-20">
+        <div id="features-section" 
+        ref={featuresRef}
+        className="features-section m-20 grid grid-cols-1 md:grid-cols-3 gap-8 scroll-mt-20">
           <FeatureCard
             iconBgColor="#e0f2fe" // Light Blue
             icon={(
@@ -335,6 +360,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
           />
         </div>
       </div>
+    
     </div>
   );
 };
