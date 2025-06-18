@@ -89,7 +89,7 @@ npm install
 3. Start the development servers:
 ```bash
 # Start backend server (from server directory)
-npm run dev
+npm start
 
 # Start frontend server (from client directory)
 npm run dev
@@ -128,15 +128,12 @@ POST /api/auth/logout
 ```http
 POST /api/analyze
 GET /api/exercises
-GET /api/exercises/:id
+GET /api/combo 
 ```
 
 ### User Data
 ```http
-GET /api/user/profile
-PUT /api/user/profile
-GET /api/user/workouts
-POST /api/user/workouts
+GET /api/user/me
 ```
 
 ## 🧪 Testing
@@ -190,16 +187,16 @@ gym-equipment/
 │   ├── src/
 │   │   ├── components/    # React components
 │   │   ├── context/      # React context
-│   │   ├── hooks/        # Custom hooks
+│   │   ├── component/        # common
 │   │   ├── pages/        # Page components
 │   │   └── utils/        # Utility functions
 │   └── public/           # Static assets
 ├── server/                # Backend Node.js application
 │   ├── controllers/      # Route controllers
-│   ├── models/          # Database models
+│   ├──prisma/          # Database models (ORM)
 │   ├── routes/          # API routes
-│   └── utils/           # Utility functions
-└── docs/                 # Documentation
+│   └── middleware/           # Middleware
+└── Readme/                 # Documentation
 ```
 
 ---
