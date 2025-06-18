@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../utils/axios';
+import { supabase } from '../components/auth/supabaseClient';
 
 const AuthContext = createContext(null);
 
@@ -8,13 +9,45 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
+    // Check for both token and Supabase session
     const token = localStorage.getItem('token');
-    if (token) {
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          // Handle Supabase user
+          setUser({
+            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+            email: session.user.email,
+            id: session.user.id
+          });
+        } else if (token) {
+          // Handle regular token auth
+          await fetchUserData();
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser({
+          name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+          email: session.user.email,
+          id: session.user.id
+        });
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => subscription?.unsubscribe();
   }, []);
 
   const fetchUserData = async () => {
@@ -65,11 +98,18 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post('/auth/logout');
+      // Check if it's a Supabase user
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.auth.signOut();
+      } else {
+        // Regular token logout
+        await axios.post('/auth/logout');
+        localStorage.removeItem('token');
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
       setUser(null);
     }
   };
