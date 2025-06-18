@@ -80,7 +80,7 @@ const Navbar = ({ scrollToFeatures, scrollToFooter, scrollToHome }) => {
   return (
     <nav
       ref={navbarRef}
-      className={`fixed top-4 left-1/8 transform -translate-x-1/8 z-50 w-[95%] max-w-6xl mx-auto transition-all duration-300 ${
+      className={`fixed top-4 left-1/9 transform -translate-x-1/8 z-50 w-[95%] max-w-6xl mx-auto transition-all duration-300 ${
         isScrolled
           ? "bg-white/80 backdrop-blur-lg shadow-lg"
           : "bg-white/60 backdrop-blur-md shadow-md"
