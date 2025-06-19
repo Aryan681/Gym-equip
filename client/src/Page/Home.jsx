@@ -7,7 +7,7 @@ import Loader from "../component/common/loading/Loader";
 import FeatureCard from "../component/common/FeatureCard";
 import AuthPromptModal from "../component/common/AuthPromptModal";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
+import axios from "../utils/axios";
 
 gsap.registerPlugin(MotionPathPlugin, TextPlugin, ScrollTrigger);
 
@@ -35,17 +35,7 @@ const Home = ({ homeRef, featuresRef }) => {
       ease: "sine.inOut",
     });
 
-    // const firstLine = "Gym Equipment";
-    // const secondLine = `<br/><span class='bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-700 bg-clip-text text-transparent'>AI Assistant</span>`;
-    // gsap.to(titleRef.current, {
-    //   text:  {
-    //   value: `${firstLine}${secondLine}`,
-    //   speed: 0.5,
-    //   delimiter: "",
-    // },
-    //   duration: 1.5,
-    //   ease: "power2.in",
-    // });
+   
 
     const chars = subtitleRef.current.textContent.split("");
     subtitleRef.current.textContent = "";
