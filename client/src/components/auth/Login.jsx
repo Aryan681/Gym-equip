@@ -12,6 +12,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const page = "Login";
 
   const handleChange = (e) => {
     setFormData({
@@ -122,7 +123,7 @@ const Login = () => {
           </div>
 
           <div className="mt-6">
-            <AuthButton />
+            <AuthButton page ={page}/>
           </div>
         </div>
       </div>

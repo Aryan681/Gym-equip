@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from './supabaseClient';
 
-const AuthButton = () => {
+const AuthButton = ({page}) => {
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -25,7 +25,7 @@ const AuthButton = () => {
     <button
       onClick={handleGoogleLogin}
       disabled={loading}
-      className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="text-white bg-blue-400 hover:bg-blue-500 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed w-full"
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24">
         <path
@@ -45,7 +45,7 @@ const AuthButton = () => {
           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
         />
       </svg>
-      {loading ? 'Signing in...' : 'Login with Google'}
+      {loading ? 'Signing in...' : `${page} with Google`}
     </button>
   );
 };

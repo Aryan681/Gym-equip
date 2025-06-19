@@ -28,7 +28,7 @@ Gym Equipment AI Assistant is a cutting-edge web application that leverages comp
 - MongoDB for database
 - Redis for caching
 - JWT for authentication
-- Google OAuth integration
+- Google OAuth integration using SupaBase
 
 ### AI/ML
 - TensorFlow.js for computer vision
