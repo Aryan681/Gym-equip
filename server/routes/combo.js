@@ -6,6 +6,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require("axios");
 const auth = require('../middleware/auth');
 require("dotenv").config();
+const redisClient = require('../client/redisClient'); // adjust path accordingly
 
 
 const client = new vision.ImageAnnotatorClient({
@@ -27,8 +28,18 @@ function extractJSON(text) {
 
 // 🔥 Fetch GIF from ExerciseDB API
 async function fetchExerciseDbGif(exerciseName) {
-  const url = `https://exercisedb.p.rapidapi.com/exercises/name/${exerciseName.toLowerCase()}`;
+  const cacheKey = `gif:${exerciseName.toLowerCase()}`;
+
   try {
+    // 🧠 Step 1: Check cache
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      console.log(`Cache hit for: ${exerciseName}`);
+      return cached;
+    }
+
+    // 🔍 Step 2: Try direct API search
+    const url = `https://exercisedb.p.rapidapi.com/exercises/name/${exerciseName.toLowerCase()}`;
     const res = await axios.get(url, {
       headers: {
         "X-RapidAPI-Key": process.env.EXERCISE_API_KEY,
@@ -36,16 +47,35 @@ async function fetchExerciseDbGif(exerciseName) {
       }
     });
 
+    let gifUrl = null;
+
     if (res.data && res.data.length > 0) {
-      return res.data[0].gifUrl;
+      gifUrl = res.data[0].gifUrl;
     } else {
-      return "https://via.placeholder.com/200x150";
+      // 🤖 Step 3: Fallback - fuzzy search
+      const all = await axios.get(`https://exercisedb.p.rapidapi.com/exercises`, {
+        headers: {
+          "X-RapidAPI-Key": process.env.EXERCISE_API_KEY,
+          "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"
+        }
+      });
+      const fuzzyMatch = all.data.find(e =>
+        e.name.toLowerCase().includes(exerciseName.toLowerCase())
+      );
+      gifUrl = fuzzyMatch ? fuzzyMatch.gifUrl : "https://via.placeholder.com/200x150";
     }
+
+    // 💾 Step 4: Cache result for 24 hours
+    await redisClient.setEx(cacheKey, 60 * 60 * 24, gifUrl); // 86400s = 1 day
+    console.log(`Cache set for: ${exerciseName}`);
+    return gifUrl;
   } catch (err) {
     console.error(`ExerciseDB error for "${exerciseName}":`, err.message);
     return "https://via.placeholder.com/200x150";
   }
 }
+
+
 
 // 🔗 POST route to handle image + Gemini + GIF flow
 router.post("/", auth, upload.single("image"), async (req, res) => {
@@ -78,7 +108,7 @@ Suggest 2–3 beginner-friendly exercises using: "${equipment}".
 For each, include:
 - Exercise name
 - Target muscles
-- One beginner tip
+- One beginner tip  
 - Leave "video" field blank
 
 Return valid JSON in this format:

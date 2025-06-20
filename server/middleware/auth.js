@@ -1,9 +1,9 @@
-// backend/middleware/auth.js
-
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 const axios = require('axios');
+const redisClient = require('../client/redisClient'); // Adjust path if needed
+
+const prisma = new PrismaClient();
 
 const auth = async (req, res, next) => {
   try {
@@ -14,7 +14,7 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    // Step 1: Try your internal JWT (for email/password users)
+    // 🔐 Step 1: Try internal JWT (email/password users)
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await prisma.user.findUnique({
@@ -31,8 +31,18 @@ const auth = async (req, res, next) => {
       console.log('[auth] Not an internal JWT:', err.message);
     }
 
-    // Step 2: Validate Supabase JWT via Auth REST API
+    // 🔁 Step 2: Validate Supabase token (with Redis cache)
+    const cacheKey = `supabase_token:${token}`;
     try {
+      // ✅ 2A: Try cache first
+      const cachedUser = await redisClient.get(cacheKey);
+      if (cachedUser) {
+        req.user = JSON.parse(cachedUser);
+        console.log('[auth] Supabase user from cache:', req.user);
+        return next();
+      }
+
+      // 🌐 2B: If not in cache, fetch from Supabase API
       const { data } = await axios.get(`${process.env.SUPABASE_URL}/auth/v1/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -40,13 +50,17 @@ const auth = async (req, res, next) => {
         }
       });
 
-      req.user = {
+      const userData = {
         id: data.id,
         email: data.email,
         name: data.user_metadata?.full_name || data.email?.split('@')[0]
       };
 
-      console.log('[auth] Authenticated Supabase user:', req.user);
+      // 💾 Cache user data for 5 minutes
+      await redisClient.setEx(cacheKey, 60 * 5, JSON.stringify(userData));
+
+      req.user = userData;
+      console.log('[auth] Supabase user from API:', req.user);
       return next();
     } catch (supabaseErr) {
       console.error('[auth] Supabase token failed:', supabaseErr.response?.data || supabaseErr.message);
