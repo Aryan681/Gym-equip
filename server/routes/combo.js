@@ -1,150 +1,115 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const vision = require("@google-cloud/vision");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require("axios");
-const auth = require('../middleware/auth');
+const FormData = require("form-data");
+const auth = require("../middleware/auth");
 require("dotenv").config();
-const redisClient = require('../client/redisClient'); // adjust path accordingly
+const redisClient = require("../client/redisClient");
 
-
-const client = new vision.ImageAnnotatorClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
-});
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Utility to extract JSON from Gemini response
-function extractJSON(text) {
-  const jsonStart = text.indexOf("{");
-  const jsonEnd = text.lastIndexOf("}");
-  if (jsonStart === -1 || jsonEnd === -1) {
-    throw new Error("No valid JSON found");
-  }
-  const jsonString = text.slice(jsonStart, jsonEnd + 1);
-  return JSON.parse(jsonString);
+function slugify(name) {
+  return name
+    .toLowerCase()
+    .replace(/[\s/]+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
 }
 
-// 🔥 Fetch GIF from ExerciseDB API
-async function fetchExerciseDbGif(exerciseName) {
-  const cacheKey = `gif:${exerciseName.toLowerCase()}`;
-
+async function fetchWgerExercisesFromAPI() {
   try {
-    // 🧠 Step 1: Check cache
-    const cached = await redisClient.get(cacheKey);
-    if (cached) {
-      console.log(`Cache hit for: ${exerciseName}`);
-      return cached;
+    let allExercises = [];
+    let nextUrl = "https://wger.de/api/v2/exercise/?limit=100";
+
+    while (nextUrl) {
+      const res = await axios.get(nextUrl);
+      const data = res.data;
+      allExercises.push(...data.results);
+      nextUrl = data.next;
     }
 
-    // 🔍 Step 2: Try direct API search
-    const url = `https://exercisedb.p.rapidapi.com/exercises/name/${exerciseName.toLowerCase()}`;
-    const res = await axios.get(url, {
-      headers: {
-        "X-RapidAPI-Key": process.env.EXERCISE_API_KEY,
-        "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"
-      }
-    });
-
-    let gifUrl = null;
-
-    if (res.data && res.data.length > 0) {
-      gifUrl = res.data[0].gifUrl;
-    } else {
-      // 🤖 Step 3: Fallback - fuzzy search
-      const all = await axios.get(`https://exercisedb.p.rapidapi.com/exercises`, {
-        headers: {
-          "X-RapidAPI-Key": process.env.EXERCISE_API_KEY,
-          "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"
-        }
-      });
-      const fuzzyMatch = all.data.find(e =>
-        e.name.toLowerCase().includes(exerciseName.toLowerCase())
-      );
-      gifUrl = fuzzyMatch ? fuzzyMatch.gifUrl : "https://via.placeholder.com/200x150";
-    }
-
-    // 💾 Step 4: Cache result for 24 hours
-    await redisClient.setEx(cacheKey, 60 * 60 * 24, gifUrl); // 86400s = 1 day
-    console.log(`Cache set for: ${exerciseName}`);
-    return gifUrl;
+    // Filter English exercises only
+    return allExercises.filter((e) => e.language === 2);
   } catch (err) {
-    console.error(`ExerciseDB error for "${exerciseName}":`, err.message);
+    console.error("Wger fetch error:", err.message);
+    return [];
+  }
+}
+
+async function fetchExerciseGif(slug) {
+  const url = `https://wger.de/en/exercise/${slug}/view/`;
+  try {
+    const res = await axios.get(url);
+    const html = res.data;
+    const match = html.match(/<img[^>]+src="([^">]+\/media\/exercise-images[^">]+)"/);
+    return match ? `https://wger.de${match[1]}` : "https://via.placeholder.com/200x150";
+  } catch (err) {
+    console.error(`GIF fetch error for "${slug}":`, err.message);
     return "https://via.placeholder.com/200x150";
   }
 }
 
-
-
-// 🔗 POST route to handle image + Gemini + GIF flow
 router.post("/", auth, upload.single("image"), async (req, res) => {
   try {
     const imageBuffer = req.file.buffer;
 
-    // 🎯 Step 1: Detect labels from image
-    const [result] = await client.labelDetection({ image: { content: imageBuffer } });
-    const labels = result.labelAnnotations;
-    const possibleLabels = labels.map(l => l.description.toLowerCase());
+    const formData = new FormData();
+    formData.append("file", imageBuffer, {
+      filename: req.file.originalname || "image.jpg",
+      contentType: req.file.mimetype,
+    });
 
-    // 🏋️‍♂️ Step 2: Match against gym equipment
-    const gymEquipmentKeywords = [
-      "dumbbell", "barbell", "lat pulldown", "bench press", "treadmill",
-      "elliptical", "rowing machine", "leg press", "cable machine",
-      "pull-up bar", "kettlebell", "resistance band", "smith machine"
-    ];
-
-    const equipment = possibleLabels.find(label =>
-      gymEquipmentKeywords.some(eq => label.includes(eq))
+    const fastApiRes = await axios.post(
+      process.env.EQUIPMENT_PREDICTOR_URL,
+      formData,
+      { headers: formData.getHeaders() }
     );
 
+    const equipment = fastApiRes.data.label;
+    console.log("FastAPI predicted equipment:", equipment);
     if (!equipment) {
-      return res.status(404).json({ error: "No specific gym equipment detected." });
+      return res.status(404).json({ error: "No gym equipment detected." });
     }
 
-    // ✍️ Step 3: Ask Gemini for beginner exercises
-    const prompt = `
-Suggest 2–3 beginner-friendly exercises using: "${equipment}".
-For each, include:
-- Exercise name
-- Target muscles
-- One beginner tip  
-- Leave "video" field blank
-
-Return valid JSON in this format:
-{
-  "equipment": "dumbbell",
-  "exercises": [
-    {
-      "name": "Dumbbell Curl",
-      "video": "",
-      "muscles": ["biceps"],
-      "tip": "Keep elbows close to your body"
-    }
-  ]
-}
-Only return valid JSON. No text before or after.
-`;
-
-    const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" });
-    const resultGemini = await model.generateContent(prompt);
-    const response = await resultGemini.response;
-    const text = response.text();
-    const parsed = extractJSON(text);
-
-    // 🎥 Step 4: Replace blank video fields with ExerciseDB GIFs
-    for (let exercise of parsed.exercises) {
-      const gifUrl = await fetchExerciseDbGif(exercise.name);
-      exercise.video = gifUrl;
+    const cacheKey = `wger-exercises`;
+    let allExercises = JSON.parse(await redisClient.get(cacheKey));
+    if (!allExercises) {
+      allExercises = await fetchWgerExercisesFromAPI();
+      await redisClient.setEx(cacheKey, 86400, JSON.stringify(allExercises));
     }
 
-    // ✅ Done!
-    res.json(parsed);
+    const matched = allExercises
+      .filter((e) =>
+        e.name?.toLowerCase().includes(equipment.toLowerCase())
+      )
+      .slice(0, 3);
+
+    if (matched.length === 0) {
+      return res.status(404).json({ error: "No exercises found for this equipment." });
+    }
+
+    const finalExercises = [];
+
+    for (const ex of matched) {
+      const slug = slugify(ex.name);
+      const gif = await fetchExerciseGif(slug);
+
+      finalExercises.push({
+        name: ex.name,
+        slug,
+        description: ex.description.replace(/(<([^>]+)>)/gi, ""),
+        video: gif,
+      });
+    }
+
+    res.json({
+      equipment,
+      exercises: finalExercises,
+    });
   } catch (err) {
-    console.error("Combo error:", err.message);
-    res.status(500).json({ error: "Failed to process combo flow" });
+    console.error("Combo flow error:", err.message);
+    res.status(500).json({ error: "Failed to process combo flow." });
   }
 });
 
 module.exports = router;
-  
