@@ -12,191 +12,214 @@ Gym Equipment AI Assistant is a cutting-edge web application that leverages comp
 
 ## 🚀 Live Demo
 
-[View Live Demo](https://gym-equipment-ai.vercel.app) (Coming Soon)
+[🔗 View Live Demo](https://gym-equipment-ai.vercel.app) (Coming Soon)
+
+---
 
 ## 🧰 Tech Stack
 
 ### Frontend
-- React 18 with Vite
-- Tailwind CSS for styling
-- GSAP for animations
-- React Router for navigation
-- Axios for API requests
+
+* React 18 (Vite)
+* Tailwind CSS
+* GSAP (animations)
+* React Router
+* Axios
 
 ### Backend
-- Node.js with Express
-- MongoDB for database
-- Redis for caching
-- JWT for authentication
-- Google OAuth integration using SupaBase
+
+* Node.js + Express
+* MongoDB
+* Redis (caching)
+* JWT Auth
+* Supabase (Google OAuth)
+* Wger API Integration ✅
 
 ### AI/ML
-- TensorFlow.js for computer vision
-- Custom ML model for equipment recognition
+
+* FastAPI backend with a custom ML model
+* TensorFlow or PyTorch (used in model training)
 
 ### DevOps
-- Vercel for frontend hosting
-- Render for backend hosting
-- GitHub Actions for CI/CD
+
+* Vercel (Frontend hosting)
+* Render (Backend hosting)
+* GitHub Actions (CI/CD)
+
+---
 
 ## 🛠️ Features
 
-- 🤖 **AI-Powered Equipment Recognition**
-  - Instant identification of gym equipment from images
-  - High-accuracy computer vision model
-  - Real-time processing
+* 🧠 **AI Equipment Detection**
 
-- 💪 **Personalized Workout Plans**
-  - Custom exercise recommendations
-  - Difficulty level adaptation
-  - Progressive workout tracking
+  * FastAPI model for gym gear classification
+  * Trained on real-world gym images
 
-- 🔐 **Secure Authentication**
-  - Google OAuth integration
-  - JWT-based session management
-  - Secure password hashing
+* 💪 **Accurate Workout Suggestions**
 
-- 🎨 **Modern UI/UX**
-  - Responsive design for all devices
-  - Smooth GSAP animations
-  - Beautiful gradient effects
-  - Dark/Light mode support
+  * Uses Wger API for real exercises
+  * Retrieves exercise name, description, GIFs, and muscles
+  * Automatically adapts if no match is found
 
-- 📱 **Progressive Web App**
-  - Offline functionality
-  - Push notifications
-  - Installable on devices
+* 🚀 **Efficient Caching**
+
+  * Redis for reduced API calls and faster responses
+
+* 🔐 **Secure Auth**
+
+  * Google login via Supabase
+  * JWT-based sessions
+
+* 🎨 **Modern UI**
+
+  * Responsive Tailwind-based design
+  * Smooth page transitions with GSAP
+
+---
 
 ## 📦 Installation
 
-1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/gym-equipment.git
+git clone https://github.com/aryansingh/gym-equipment.git
 cd gym-equipment
 ```
 
-2. Install dependencies:
+### Install Dependencies
+
 ```bash
-# Install backend dependencies
+# Backend
 cd server
 npm install
 
-# Install frontend dependencies
+# Frontend
 cd ../client
 npm install
 ```
 
-3. Start the development servers:
+### Run Servers
+
 ```bash
-# Start backend server (from server directory)
+# In server/
 npm start
 
-# Start frontend server (from client directory)
+# In client/
 npm run dev
 ```
 
+---
+
 ## ⚙️ Environment Variables
 
-### Backend (.env)
+### 🔐 Backend (.env)
+
 ```env
 PORT=3000
-MONGODB_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-REDIS_URL=your_redis_url
+MONGODB_URI=your_mongodb_connection
+GOOGLE_CLIENT_ID=your_google_id
+GOOGLE_CLIENT_SECRET=your_google_secret
+REDIS_URL=redis_connection_string
+EQUIPMENT_PREDICTOR_URL=http://localhost:8000/predict
 ```
 
-### Frontend (.env)
+### 🎯 Frontend (.env)
+
 ```env
 VITE_API_URL=http://localhost:3000
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_GOOGLE_CLIENT_ID=your_google_id
 ```
 
-## 🔁 API Reference
+---
 
-### Authentication
+## 🔁 API Endpoints
+
+### Auth
+
 ```http
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/google
-GET /api/auth/me
+GET  /api/auth/me
 POST /api/auth/logout
 ```
 
-### Equipment Analysis
+### Core Functionality
+
 ```http
-POST /api/analyze
-GET /api/exercises
-GET /api/combo 
+POST /api/combo  // Upload image, predict equipment, fetch 3 workouts from Wger
 ```
 
-### User Data
-```http
-GET /api/user/me
-```
+---
+
+## 🌟 How It Works
+
+1. **User uploads image** → Frontend sends it to FastAPI.
+2. **FastAPI model predicts gym equipment** like "bench press" or "dumbbell".
+3. **Backend uses Wger API** to:
+
+   * Fetch 3 real exercises matching that equipment
+   * Provide GIFs + muscle groups + instructions
+4. **Frontend renders the exercises beautifully** to the user.
+
+---
 
 ## 🧪 Testing
 
 ```bash
-# Run backend tests
+# Backend
 cd server
 npm test
 
-# Run frontend tests
+# Frontend
 cd client
 npm test
 ```
 
-## 🙋 Contributing
+---
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## 🛣 Roadmap
 
-## 🧠 Known Issues & Roadmap
+* [x] Replace Gemini with Wger API
+* [x] Real GIFs and muscle info from Wger
+* [ ] Add language selector for exercises (Wger supports 10+ langs)
+* [ ] Equipment-based filter for Wger query
+* [ ] Add exercise difficulty rating and filters
 
-### Current Issues
-- [ ] Mobile responsiveness improvements needed
-- [ ] Performance optimization for large image uploads
-- [ ] Add more exercise variations
-
-### Roadmap
-- [ ] Integration with fitness tracking apps
-- [ ] Social features and workout sharing
-- [ ] Video exercise demonstrations
-- [ ] AI-powered form correction
+---
 
 ## 👨‍💻 Author
 
 **Aryan Singh Naruka**
-- GitHub: [@aryansingh](https://github.com/aryansingh)
-- LinkedIn: [Aryan Singh Naruka](https://linkedin.com/in/aryansingh)
+
+* GitHub: [@aryan681](https://github.com/aryan681)
+* LinkedIn: [Aryan Singh Naruka](https://linkedin.com/in/aryansingh1-2)
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see the [LICENSE](LICENSE) file for full details.
 
-## 📁 Project Structure
+---
+
+## 🗂 Project Structure
 
 ```
 gym-equipment/
-├── client/                 # Frontend React application
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── context/      # React context
-│   │   ├── component/        # common
-│   │   ├── pages/        # Page components
-│   │   └── utils/        # Utility functions
-│   └── public/           # Static assets
-├── server/                # Backend Node.js application
-│   ├── controllers/      # Route controllers
-│   ├──prisma/          # Database models (ORM)
-│   ├── routes/          # API routes
-│   └── middleware/           # Middleware
-└── Readme/                 # Documentation
+├── client/            # React frontend
+│   └── src/
+│       ├── pages/
+│       ├── components/
+│       ├── context/
+│       └── utils/
+├── server/            # Express backend
+│   ├── routes/
+│   ├── middleware/
+│   ├── controllers/
+│   └── redisClient.js
+├── detector/          # FastAPI ML service
+│   └── app.py
+└── README.md
 ```
 
 ---
